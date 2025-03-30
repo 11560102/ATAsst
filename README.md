@@ -8,13 +8,13 @@
 
 ## Install：
 ```
-bash <(curl -sL https://ghfast.top/https://raw.githubusercontent.com/qljsyph/ATAsst/refs/heads/main/ATAsst.sh)
+bash <(curl -sL https://ghfast.top/https://raw.githubusercontent.com/11560102/ATAsst/refs/heads/main/ATAsst.sh)
 ```
 （初始化运行结束，输入“**AT**”进入菜单）  
 
 ## 系统信息显示Install：
 ```
-bash <(curl -sL https://ghfast.top/https://raw.githubusercontent.com/qljsyph/DPInfo-script/refs/heads/main/auto-sysinfo.sh)
+bash <(curl -sL https://ghfast.top/https://raw.githubusercontent.com/11560102/DPInfo-script/refs/heads/main/auto-sysinfo.sh)
 ```
 
 ## 推荐面板
