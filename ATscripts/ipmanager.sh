@@ -178,8 +178,8 @@ declare -A MACS
 ALL_IFACES=()
 
 for IF in "${RAW_IFACES[@]}"; do
-    MAC=$(cat /sys/class/net/$IF/address 2>/dev/null | tr '[:upper:]' '[:lower:]')
-    DEV_PATH=$(readlink -f /sys/class/net/$IF/device 2>/dev/null)
+    MAC=$(cat "/sys/class/net/$IF/address" 2>/dev/null | tr '[:upper:]' '[:lower:]')
+    DEV_PATH=$(readlink -f "/sys/class/net/$IF/device" 2>/dev/null)
 
     if [[ -n "$MAC" && -n "${MACS[$MAC]}" ]]; then
         continue
@@ -309,12 +309,16 @@ else
         log "用户选择网卡: $IFACE [$TYPE]"
     fi
 fi
-# 检测
 NETPLAN_RENDERER=""
 # 目标网卡的 Netplan
 NETPLAN_FILES=$(grep -rl "$IFACE" /etc/netplan/*.yaml 2>/dev/null)
-if [ -n "$NETPLAN_FILES" ] && grep -q "renderer:\s*NetworkManager" $NETPLAN_FILES 2>/dev/null; then
-    NETPLAN_RENDERER="NetworkManager"
+if [ -n "$NETPLAN_FILES" ]; then
+    for file in $NETPLAN_FILES; do
+        if grep -q "renderer:\s*NetworkManager" "$file" 2>/dev/null; then
+            NETPLAN_RENDERER="NetworkManager"
+            break
+        fi
+    done
 fi
 
 if command -v nmcli >/dev/null 2>&1 && systemctl is-active --quiet NetworkManager && nmcli device status | grep -qw "$IFACE"; then
@@ -369,7 +373,7 @@ if [ "$NET_MODE" = "interfaces" ]; then
         INTERFACES_FILE="/etc/network/interfaces"
         RESOLV_CONF_FILE="/etc/resolv.conf"
 
-        cat > $INTERFACES_FILE <<EOL
+        cat > "$INTERFACES_FILE" <<EOL
 # The loopback network interface
 auto lo
 iface lo inet loopback
@@ -390,9 +394,9 @@ EOL
             done
             run_and_log "sudo resolvectl reconfigure"
         else
-            echo > $RESOLV_CONF_FILE
+            echo > "$RESOLV_CONF_FILE"
             for dns in $DNS_SERVERS; do
-                echo "nameserver $dns" >> $RESOLV_CONF_FILE
+                echo "nameserver $dns" >> "$RESOLV_CONF_FILE"
                 log "写入 DNS: $dns 到 $RESOLV_CONF_FILE"
             done
         fi
@@ -404,7 +408,7 @@ EOL
     set_if_dhcp() {
         log "用户选择切换为 DHCP 模式"
         INTERFACES_FILE="/etc/network/interfaces"
-        cat > $INTERFACES_FILE <<EOL
+        cat > "$INTERFACES_FILE" <<EOL
 # The loopback network interface
 auto lo
 iface lo inet loopback
@@ -542,7 +546,7 @@ EOL
 
     restore_latest_backup() {
         log "用户选择恢复最近备份"
-        LATEST_BACKUP=$(ls -t ${CONFIG_FILE}.bak-* 2>/dev/null | head -n 1)
+        LATEST_BACKUP=$(ls -t "${CONFIG_FILE}".bak-* 2>/dev/null | head -n 1)
         if [ -z "$LATEST_BACKUP" ]; then
             echo -e "${RED}未找到备份文件，无法恢复。${NC}"
             log "未找到备份文件，恢复失败"
